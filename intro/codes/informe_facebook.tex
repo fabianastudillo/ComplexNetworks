@@ -1,0 +1,707 @@
+%=============================================================
+%  Informe Técnico -- Análisis de Centralidad Red Social Facebook
+%  Plantilla base -- Libro de Marca UCUENCA
+%=============================================================
+\documentclass[12pt,a4paper,oneside,openany]{book}
+\let\cleardoublepage=\clearpage
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{babel}
+\babelprovide[import,main]{spanish}
+% Tipografia oficial (usar MetaPro si esta disponible, fallback a FiraSans)
+\IfFileExists{fonts/MetaPro/MetaPro-Book.otf}{%
+  \usepackage{fontspec}
+  \setmainfont{MetaPro}[
+    Path = fonts/MetaPro/, Extension = .otf,
+    UprightFont = *-Book, BoldFont = *-Bold,
+    ItalicFont = *-BookItalic, BoldItalicFont = *-BoldItalic,
+  ]
+  \setsansfont{MetaPro}[
+    Path = fonts/MetaPro/, Extension = .otf,
+    UprightFont = *-Book, BoldFont = *-Bold,
+    ItalicFont = *-BookItalic, BoldItalicFont = *-BoldItalic,
+  ]
+  \setmonofont{FiraMono-Regular}[Scale=0.85]
+}{%
+  % Fallback para pdflatex
+  \usepackage[sfdefault,light]{FiraSans}
+  \usepackage{FiraMono}
+}
+\usepackage{microtype}
+\usepackage[top=2.8cm, bottom=2.8cm, left=3cm, right=2.5cm, headheight=16pt]{geometry}
+\usepackage{graphicx}
+\usepackage[dvipsnames,table]{xcolor}
+
+%--- Colores corporativos UCUENCA ---
+\definecolor{UCblue}{RGB}{0,40,86}
+\definecolor{UCred}{RGB}{165,16,8}
+\definecolor{UCgris}{RGB}{111,111,111}
+\definecolor{UCbluelight}{RGB}{230,236,244}
+\definecolor{UCbluemid}{RGB}{0,62,126}
+\definecolor{codebg}{RGB}{248,248,248}
+\definecolor{infoboxbg}{RGB}{232,240,252}
+\definecolor{successgreen}{RGB}{39,174,96}
+\definecolor{warnyellow}{RGB}{241,196,15}
+\definecolor{criticalbg}{RGB}{255,235,235}
+
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{xltabular}
+\usepackage{chngcntr}
+\counterwithout{table}{chapter}
+\counterwithout{figure}{chapter}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage[colorlinks=true, linkcolor=UCblue, urlcolor=UCblue, citecolor=UCblue,
+            bookmarks=true, unicode=true,
+            pdftitle={Análisis de Centralidad -- Red Social Facebook},
+            pdfauthor={Darwin Fabián Astudillo Salinas -- Universidad de Cuenca}]{hyperref}
+\usepackage{xurl}
+\usepackage{seqsplit}
+\usepackage{caption}
+\usepackage{float}
+\usepackage[skins,breakable,listings]{tcolorbox}
+\usepackage{titlesec}
+\usepackage{titletoc}
+\usepackage{fontawesome5}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{emptypage}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\pgfplotsset{compat=1.18}
+
+%=============================================================
+%  Estilo de listados
+%=============================================================
+\lstdefinestyle{audit}{
+  backgroundcolor=\color{codebg},
+  basicstyle=\small\ttfamily,
+  keywordstyle=\color{UCblue}\bfseries,
+  commentstyle=\color{UCgris}\itshape,
+  stringstyle=\color{UCred},
+  numberstyle=\tiny\color{UCgris},
+  numbers=left, stepnumber=1, numbersep=8pt,
+  frame=single, framerule=0.5pt, rulecolor=\color{UCblue!30},
+  breaklines=true, breakatwhitespace=true,
+  showstringspaces=false, tabsize=2, captionpos=b,
+}
+\lstset{style=audit,
+  literate=%
+    {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+    {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+    {ñ}{{\~n}}1 {Ñ}{{\~N}}1
+    {—}{{---}}3 {–}{{--}}2
+    {¿}{{?`}}1  {¡}{{!`}}1
+}
+
+%=============================================================
+%  Cajas tcolorbox
+%=============================================================
+\newtcolorbox{criticalbox}[1][CRITICO]{
+  enhanced, breakable, colback=criticalbg, colframe=UCred,
+  fonttitle=\bfseries\small\color{white},
+  title={\faExclamationCircle\hspace{5pt}#1}, arc=2pt, boxrule=0pt,
+  attach boxed title to top left={yshift=-2pt},
+  boxed title style={colback=UCred, arc=2pt, boxrule=0pt},
+  left=8pt, right=8pt, top=6pt, bottom=6pt,
+}
+
+\newtcolorbox{hallazgobox}[1][Hallazgo]{
+  enhanced, breakable, colback=UCbluelight, colframe=UCblue,
+  fonttitle=\bfseries\small\color{white},
+  title={\faSearch\hspace{5pt}#1}, arc=2pt,
+  left=8pt, right=8pt, top=6pt, bottom=6pt, boxrule=0pt, titlerule=0pt,
+  attach boxed title to top left={yshift=-2pt,xshift=0pt},
+  boxed title style={colback=UCblue, arc=2pt, boxrule=0pt},
+}
+
+\newtcolorbox{recomendacionbox}[1][Recomendacion]{
+  enhanced, breakable, colback=successgreen!8, colframe=successgreen!70!black,
+  fonttitle=\bfseries\small\color{white},
+  title={\faClipboardCheck\hspace{5pt}#1}, arc=2pt, boxrule=0pt,
+  attach boxed title to top left={yshift=-2pt},
+  boxed title style={colback=successgreen!70!black, arc=2pt, boxrule=0pt},
+  left=8pt, right=8pt, top=6pt, bottom=6pt,
+}
+
+\newtcolorbox{infobox}[1][Nota]{
+  enhanced, breakable, colback=infoboxbg, colframe=UCblue,
+  fonttitle=\bfseries\small,
+  title={\faInfoCircle\hspace{5pt}#1}, arc=2pt, boxrule=0.6pt,
+  left=8pt, right=8pt, top=4pt, bottom=4pt,
+}
+
+\newtcolorbox{warningbox}[1][Advertencia]{
+  enhanced, breakable, colback=warnyellow!15, colframe=warnyellow!70!black,
+  fonttitle=\bfseries\small,
+  title={\faExclamationTriangle\hspace{5pt}#1}, arc=2pt, boxrule=0.6pt,
+  left=8pt, right=8pt, top=4pt, bottom=4pt,
+}
+
+%=============================================================
+%  Formato de titulos
+%=============================================================
+\titleformat{\chapter}[display]
+  {\normalfont\LARGE\bfseries\color{UCblue}}
+  {\color{UCred}\large\bfseries\chaptername\ \thechapter}{4pt}{}
+  [{\color{UCblue}\vspace{-4pt}\rule{\linewidth}{2pt}}]
+\titlespacing*{\chapter}{0pt}{-20pt}{28pt}
+\titleformat{\section}{\normalfont\large\bfseries\color{UCblue}}{\thesection}{1em}{}
+  [{\color{UCred}\vspace{1pt}\rule{\linewidth}{1.5pt}}]
+\titleformat{\subsection}{\normalfont\normalsize\bfseries\color{UCred}}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}{\normalfont\normalsize\bfseries\color{UCblue}}{\thesubsubsection}{1em}{}
+
+%=============================================================
+%  Headers y footers
+%=============================================================
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\bfseries\color{UCred}\MakeUppercase{Análisis Red Social Facebook}}
+\fancyhead[R]{\footnotesize\bfseries\color{UCblue}\MakeUppercase{Universidad de Cuenca}}
+\fancyfoot[R]{\small\color{UCgris}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancypagestyle{plain}{
+  \fancyhf{}
+  \fancyfoot[R]{\small\color{UCgris}\thepage}
+  \renewcommand{\headrulewidth}{0pt}
+}
+
+%=============================================================
+%  Tipos de columna personalizados
+%=============================================================
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{1pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{1pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{1pt}}m{#1}}
+
+%=============================================================
+%  DOCUMENTO
+%=============================================================
+\begin{document}
+\pagestyle{empty}
+
+%-------------------------------------------------------------
+%  PORTADA INSTITUCIONAL
+%-------------------------------------------------------------
+\begin{titlepage}
+  \thispagestyle{empty}
+  \pagecolor{UCblue}
+  \color{white}
+  \begin{tikzpicture}[remember picture, overlay]
+    \fill[UCred] ([yshift=-3.8cm]current page.north west)
+      rectangle ([yshift=-4.2cm]current page.north east);
+    \fill[UCred] ([yshift=3.6cm]current page.south west)
+      rectangle ([yshift=3.2cm]current page.south east);
+  \end{tikzpicture}
+  \vspace*{0.9cm}
+  % Logo removed to avoid duplication with the large typographic title
+  % (was: \includegraphics[width=6cm]{logo-ucuenca-ingenieria.png})
+  \begin{flushleft}
+    {\fontsize{42}{46}\selectfont\bfseries\textcolor{white}{UCUENCA}}\\[-6pt]
+    {\color{UCred}\rule{0.52\linewidth}{3pt}}\\[4pt]
+    {\small\bfseries\color{white!80!UCblue}\MakeUppercase{Facultad de Ingeniería}}\\[2pt]
+    {\fontsize{7}{8}\selectfont\bfseries\color{white!60!UCblue}%
+      \MakeUppercase{Redes Complejas --- Universidad de Cuenca}}
+  \end{flushleft}
+  \vspace{3.8cm}
+  \begin{flushleft}
+    {\fontsize{10}{12}\selectfont\bfseries\color{white!70!UCblue}%
+      \MakeUppercase{Informe Técnico}}\\[14pt]
+    {\fontsize{38}{44}\selectfont\bfseries\color{white}%
+      ANÁLISIS DE\\[4pt]CENTRALIDAD}\\[10pt]
+    {\fontsize{22}{26}\selectfont\bfseries\color{white!85!UCblue}%
+      Red Social Facebook}\\[6pt]
+    {\small\color{white!60!UCblue}%
+      Teoría de Grafos y Redes Complejas}
+  \end{flushleft}
+  \vfill
+  \begin{flushleft}
+    {\color{UCred}\rule{0.4\linewidth}{1pt}}\\[8pt]
+    {\normalsize\bfseries\color{white}%
+      Uso Académico}\\[4pt]
+    {\small\color{white!70!UCblue}%
+      Teoría de Grafos y Redes Complejas}\\[16pt]
+    {\footnotesize\color{white!50!UCblue}%
+      Darwin Fabián Astudillo Salinas -- Universidad de Cuenca}\\[4pt]
+    {\footnotesize\color{white!50!UCblue}%
+      Cuenca --- Ecuador \quad 15 de abril de 2026}
+  \end{flushleft}
+  \vspace{0.6cm}
+\end{titlepage}
+\pagecolor{white}\color{black}
+\pagestyle{fancy}
+
+\tableofcontents
+\clearpage
+
+%=============================================================
+%  CAPÍTULO 1: INTRODUCCIÓN
+%=============================================================
+\chapter{Introducción}
+
+%-------------------------------------------------------------
+\section{Objetivo}
+%-------------------------------------------------------------
+
+\begin{infobox}[Objetivo del Análisis]
+El presente informe tiene como objetivo analizar la estructura de la red social Facebook
+mediante métricas de centralidad de la teoría de grafos. Se busca identificar los nodos
+más influyentes de la red utilizando tres medidas fundamentales: centralidad de grado,
+centralidad de intermediación y centralidad de cercanía. El análisis permite comprender
+los patrones de conectividad, la distribución del poder y la estructura comunitaria
+de esta red social.
+\end{infobox}
+
+%-------------------------------------------------------------
+\section{Dataset}
+%-------------------------------------------------------------
+
+El dataset utilizado corresponde a las \textbf{redes ego de Facebook} del repositorio
+Stanford Large Network Dataset Collection (SNAP). Este conjunto de datos fue recopilado
+a partir de encuestas realizadas a usuarios de Facebook, combinando sus redes ego
+(amigos inmediatos y conexiones entre ellos).
+
+Características principales del dataset:
+\begin{itemize}[leftmargin=1.5cm]
+  \item \textbf{Fuente:} Stanford Network Analysis Project (SNAP)
+  \item \textbf{Archivo:} \nolinkurl{facebook_combined.txt}
+  \item \textbf{Formato:} Lista de aristas (pares de nodos separados por espacio, indexados desde 0)
+  \item \textbf{Nodos:} 4\,039 usuarios de Facebook
+  \item \textbf{Aristas:} 88\,234 relaciones de amistad
+  \item \textbf{Tipo:} Grafo no dirigido y no ponderado
+  \item \textbf{Combinación:} Múltiples redes ego combinadas en un solo grafo
+\end{itemize}
+
+La URL del dataset es:
+\url{https://snap.stanford.edu/data/ego-Facebook.html}
+
+%-------------------------------------------------------------
+\section{Metodología}
+%-------------------------------------------------------------
+
+Para el análisis de centralidad se emplearon tres métricas fundamentales de la teoría
+de redes complejas:
+
+\begin{enumerate}[leftmargin=1.5cm]
+  \item \textbf{Centralidad de Grado} (\textit{Degree Centrality}):
+    Mide el número de conexiones directas de cada nodo, normalizado por el máximo
+    posible ($n-1$). Un nodo con alta centralidad de grado es un \textit{hub}
+    altamente conectado.
+
+  \item \textbf{Centralidad de Intermediación} (\textit{Betweenness Centrality}):
+    Cuantifica la frecuencia con que un nodo aparece en los caminos
+    más cortos entre todos los pares de nodos. Un nodo con alta
+    intermediación actúa como \textit{puente} crítico para el flujo
+    de información.
+
+  \item \textbf{Centralidad de Cercanía} (\textit{Closeness Centrality}):
+    Mide la inversa de la suma de las distancias más cortas desde un nodo a todos
+    los demás. Un nodo con alta cercanía puede alcanzar rápidamente a cualquier
+    otro nodo de la red.
+\end{enumerate}
+
+El análisis fue implementado en \textbf{Julia} utilizando la biblioteca
+\texttt{Graphs.jl}, que proporciona implementaciones eficientes de algoritmos
+sobre grafos. La visualización se realizó con \texttt{GraphPlot.jl} y
+\texttt{Compose.jl}.
+
+
+%=============================================================
+%  CAPÍTULO 2: ANÁLISIS DE LA RED
+%=============================================================
+\chapter{Análisis de la Red}
+
+%-------------------------------------------------------------
+\section{Propiedades Generales}
+%-------------------------------------------------------------
+
+La siguiente tabla resume las propiedades estructurales fundamentales de la red
+de Facebook analizada:
+
+\begin{xltabular}{\linewidth}{>{\bfseries}L{5cm}X}
+  \caption{Propiedades generales de la red Facebook}\label{tab:propiedades}\\
+  \toprule
+  \textbf{Propiedad} & \textbf{Valor} \\
+  \midrule
+  \endfirsthead
+  \toprule
+  \textbf{Propiedad} & \textbf{Valor} \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endlastfoot
+  Número de nodos       & 4\,039 \\
+  Número de aristas     & 88\,234 \\
+  Grado promedio        & 43.69 \\
+  Grado máximo          & 1\,045 (nodo 107) \\
+  Grado mínimo          & 1 \\
+  Densidad              & 0.01082 \\
+  Componentes conexas   & 1 (red completamente conectada) \\
+  Diámetro              & 8 \\
+  \bottomrule
+\end{xltabular}
+
+La red es \textbf{completamente conexa} (una sola componente), lo que significa que
+cualquier usuario puede alcanzar a cualquier otro a través de una cadena de amistades.
+El diametro de 8 indica que, en el peor caso, se necesitan 8 saltos para llegar de
+un usuario a otro.
+
+%-------------------------------------------------------------
+\section{Visualización de la Red}
+%-------------------------------------------------------------
+
+La Figura~\ref{fig:red} presenta la visualización completa de la red de Facebook.
+Los nodos están coloreados según su centralidad de grado (tonos azules más intensos
+indican mayor centralidad) y su tamaño es proporcional al grado del nodo.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\linewidth]{facebook_network.pdf}
+  \caption{Visualizacion de la red social Facebook. Nodos coloreados por centralidad
+  de grado (azul mas intenso = mayor centralidad) y tamaño proporcional al grado.
+  Aristas con transparencia alta ($\alpha = 0.05$) para facilitar la lectura.}
+  \label{fig:red}
+\end{figure}
+
+\begin{hallazgobox}[Estructura comunitaria visible]
+La visualización revela una clara \textbf{estructura comunitaria} en la red.
+Se observan agrupaciones densas de nodos (comunidades) conectadas entre sí
+por nodos puente. Los \textit{hubs} (nodos grandes con color azul intenso)
+son claramente visibles en posiciones centrales de la red, particularmente
+el nodo 107 que destaca como el más conectado. La disposición espacial
+sugiere la presencia de múltiples redes ego superpuestas, consistente con
+la naturaleza del dataset.
+\end{hallazgobox}
+
+%-------------------------------------------------------------
+\section{Distribución de Grado}
+%-------------------------------------------------------------
+
+La distribución de grado es una de las propiedades más importantes de una red
+compleja. La Figura~\ref{fig:degdist} muestra la distribución de grado en escala
+log-log, lo que permite identificar si la red sigue una distribución de ley de
+potencias (power-law).
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      xlabel={Grado ($k$)},
+      ylabel={Frecuencia},
+      xmode=log,
+      ymode=log,
+      log basis x=10,
+      log basis y=10,
+      grid=both,
+      grid style={line width=.1pt, draw=gray!20},
+      major grid style={line width=.2pt, draw=gray!50},
+      width=0.88\linewidth,
+      height=8cm,
+      legend pos=north east,
+      title style={font=\bfseries\color{UCblue}},
+      label style={font=\small},
+      tick label style={font=\footnotesize},
+    ]
+    \addplot[
+      only marks,
+      mark=*, mark size=1.5pt, color=UCblue!70, fill=UCblue!40
+    ] table [
+      x=degree, y=count, col sep=comma
+    ] {degree_distribution.csv};
+    \addlegendentry{Datos observados}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Distribución de grado de la red Facebook en escala log-log.
+  Cada punto representa el número de nodos con un grado determinado.}
+  \label{fig:degdist}
+\end{figure}
+
+\begin{hallazgobox}[Distribución de cola pesada]
+La distribución de grado presenta una \textbf{cola pesada} (\textit{heavy tail})
+característica de redes libres de escala (\textit{scale-free}). La mayoría de los
+nodos tienen pocas conexiones (grado bajo), mientras que unos pocos nodos
+(\textit{hubs}) poseen cientos o incluso más de mil conexiones. Este patrón es
+consistente con el modelo de \textit{attachment preferencial} de Barabási-Albert,
+donde los nodos nuevos tienden a conectarse a nodos ya muy conectados.
+
+En escala log-log, la relación aproximadamente lineal en la región central sugiere
+una distribución tipo ley de potencias: $P(k) \sim k^{-\gamma}$.
+\end{hallazgobox}
+
+
+%=============================================================
+%  CAPÍTULO 3: ANÁLISIS DE CENTRALIDAD
+%=============================================================
+\chapter{Análisis de Centralidad}
+
+%-------------------------------------------------------------
+\section{Centralidad de Grado}
+%-------------------------------------------------------------
+
+La centralidad de grado mide la importancia de un nodo basándose en su número
+de conexiones directas. La siguiente tabla muestra los 10 nodos con mayor
+centralidad de grado:
+
+\begin{xltabular}{\linewidth}{C{1.2cm}C{1.5cm}C{1.8cm}C{2.5cm}X}
+  \caption{Top 10 nodos por centralidad de grado}\label{tab:degree}\\
+  \toprule
+  \textbf{Rank} & \textbf{Nodo} & \textbf{Grado} & \textbf{Centralidad} & \textbf{distribución} \\
+  \midrule
+  \endfirsthead
+  \toprule
+  \textbf{Rank} & \textbf{Nodo} & \textbf{Grado} & \textbf{Centralidad} & \textbf{distribución} \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endlastfoot
+  1  & 107  & 1\,045 & 0.258791 & Hub principal \\
+  2  & 1684 & 792    & 0.196137 & Segundo hub \\
+  3  & 1912 & 755    & 0.186974 & Tercer hub \\
+  4  & 3437 & 547    & 0.135463 & Hub intermedio \\
+  5  & 0    & 347    & 0.085934 & Nodo origen del dataset \\
+  6  & 2543 & 294    & 0.072808 & --- \\
+  7  & 2347 & 291    & 0.072065 & --- \\
+  8  & 1888 & 254    & 0.062902 & --- \\
+  9  & 1800 & 245    & 0.060674 & --- \\
+  10 & 1663 & 235    & 0.058197 & --- \\
+  \bottomrule
+\end{xltabular}
+
+\begin{hallazgobox}[Nodo 107: el super-hub de la red]
+El nodo 107 es, por un amplio margen, el nodo con mayor grado de la red, con
+\textbf{1\,045 conexiones} (25.9\% de todos los nodos de la red). Esto lo convierte
+en el \textit{hub} dominante. El segundo nodo más conectado (1684) tiene 792
+conexiones, un 24\% menos. La caída abrupta del grado entre los primeros puestos
+es consistente con la distribución de ley de potencias observada.
+
+Notablemente, el nodo 0 (origen del dataset) aparece en la posición 5 con 347
+conexiones, lo que sugiere que fue uno de los egos utilizados para recopilar datos.
+\end{hallazgobox}
+
+%-------------------------------------------------------------
+\section{Centralidad de Intermediación}
+%-------------------------------------------------------------
+
+La centralidad de intermediación identifica nodos que sirven como puentes en la red,
+controlando el flujo de información entre diferentes comunidades:
+
+\begin{xltabular}{\linewidth}{C{1.2cm}C{1.5cm}C{2.5cm}X}
+  \caption{Top 10 nodos por centralidad de intermediación}\label{tab:betweenness}\\
+  \toprule
+  \textbf{Rank} & \textbf{Nodo} & \textbf{Centralidad} & \textbf{distribución} \\
+  \midrule
+  \endfirsthead
+  \toprule
+  \textbf{Rank} & \textbf{Nodo} & \textbf{Centralidad} & \textbf{distribución} \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endlastfoot
+  1  & 107  & 0.480518 & Puente principal \\
+  2  & 1684 & 0.337797 & Segundo puente \\
+  3  & 3437 & 0.236115 & Conector intercomunidades \\
+  4  & 1912 & 0.229295 & Conector intercomunidades \\
+  5  & 1085 & 0.149015 & Puente local \\
+  6  & 0    & 0.146306 & Nodo ego \\
+  7  & 698  & 0.115330 & --- \\
+  8  & 567  & 0.096310 & --- \\
+  9  & 58   & 0.084360 & --- \\
+  10 & 428  & 0.064309 & --- \\
+  \bottomrule
+\end{xltabular}
+
+\begin{hallazgobox}[Nodo 107: super-puente de la red]
+El nodo 107 vuelve a liderar esta métrica con una centralidad de intermediación
+de \textbf{0.4805}, lo que significa que aproximadamente el 48\% de todos los
+caminos más cortos de la red pasan por este nodo. Esto le otorga un poder
+extraordinario como \textit{broker} de información.
+
+Es notable que el nodo \textbf{1085} aparece en la posición 5 de intermediación
+pero \textbf{no aparece} en el top 10 de grado, lo que indica que su importancia
+radica en su posición estratégica entre comunidades, no en su número de conexiones.
+De manera similar, los nodos 698, 567, 58 y 428 son puentes críticos sin ser hubs.
+\end{hallazgobox}
+
+%-------------------------------------------------------------
+\section{Centralidad de Cercanía}
+%-------------------------------------------------------------
+
+La centralidad de cercanía mide qué tan rápidamente un nodo puede alcanzar a todos
+los demás nodos de la red:
+
+\begin{xltabular}{\linewidth}{C{1.2cm}C{1.5cm}C{2.5cm}X}
+  \caption{Top 10 nodos por centralidad de cercanía}\label{tab:closeness}\\
+  \toprule
+  \textbf{Rank} & \textbf{Nodo} & \textbf{Centralidad} & \textbf{distribución} \\
+  \midrule
+  \endfirsthead
+  \toprule
+  \textbf{Rank} & \textbf{Nodo} & \textbf{Centralidad} & \textbf{distribución} \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endlastfoot
+  1  & 107  & 0.459699 & Nodo más central \\
+  2  & 58   & 0.397402 & Alta eficiencia de alcance \\
+  3  & 428  & 0.394837 & Alta eficiencia de alcance \\
+  4  & 563  & 0.393913 & Posición estructural privilegiada \\
+  5  & 1684 & 0.393606 & También hub de grado \\
+  6  & 171  & 0.370493 & --- \\
+  7  & 348  & 0.369916 & --- \\
+  8  & 483  & 0.369848 & --- \\
+  9  & 414  & 0.369543 & --- \\
+  10 & 376  & 0.366558 & --- \\
+  \bottomrule
+\end{xltabular}
+
+\begin{hallazgobox}[Distribución más equilibrada de cercanía]
+La centralidad de cercanía presenta resultados \textbf{notablemente diferentes}
+a las otras dos métricas. Mientras que el nodo 107 sigue liderando (0.4597),
+la distribución es mucho más uniforme: la diferencia entre el primer y décimo
+puesto es de solo 0.093 (vs. 0.200 en grado y 0.416 en intermediación).
+
+Aparecen nodos como \textbf{58}, \textbf{428}, \textbf{563} y \textbf{171} que
+\textit{no figuran} en el top 10 de grado, pero tienen alta cercanía. Estos
+nodos ocupan posiciones \textbf{estructuralmente centrales} en la red: aunque
+no son hubs masivos, están ubicados de forma que minimizan la distancia promedio
+a todos los demás nodos. Esto sugiere que son nodos que conectan eficientemente
+diferentes regiones de la red.
+\end{hallazgobox}
+
+%-------------------------------------------------------------
+\section{Comparación de Métricas}
+%-------------------------------------------------------------
+
+Para comprender mejor la relación entre las tres métricas de centralidad, la
+siguiente tabla identifica los nodos que aparecen en múltiples listas de top 10:
+
+\begin{xltabular}{\linewidth}{C{1.5cm}C{2cm}C{2.8cm}C{2.2cm}X}
+  \caption{Nodos presentes en múltiples top 10 de centralidad}\label{tab:comparacion}\\
+  \toprule
+  \textbf{Nodo} & \textbf{Grado} & \textbf{Intermediación} & \textbf{Cercanía} & \textbf{Perfil} \\
+  \midrule
+  \endfirsthead
+  \toprule
+  \textbf{Nodo} & \textbf{Grado} & \textbf{Intermediación} & \textbf{Cercanía} & \textbf{Perfil} \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endlastfoot
+  107  & \textcolor{UCred}{\bfseries 1\textordmasculine} & \textcolor{UCred}{\bfseries 1\textordmasculine} & \textcolor{UCred}{\bfseries 1\textordmasculine} & Super-hub / Super-puente \\
+  \midrule
+  1684 & \textcolor{UCblue}{\bfseries 2\textordmasculine} & \textcolor{UCblue}{\bfseries 2\textordmasculine} & \textcolor{UCblue}{\bfseries 5\textordmasculine} & Hub + puente mayor \\
+  \midrule
+  3437 & 4\textordmasculine & 3\textordmasculine & --- & Hub + puente sin cercanía \\
+  \midrule
+  1912 & 3\textordmasculine & 4\textordmasculine & --- & Hub + puente sin cercanía \\
+  \midrule
+  0    & 5\textordmasculine & 6\textordmasculine & --- & Nodo ego, hub moderado \\
+  \midrule
+  58   & --- & 9\textordmasculine & \textcolor{successgreen}{\bfseries 2\textordmasculine} & Puente eficiente (no es hub) \\
+  \midrule
+  428  & --- & 10\textordmasculine & \textcolor{successgreen}{\bfseries 3\textordmasculine} & Puente eficiente (no es hub) \\
+  \bottomrule
+\end{xltabular}
+
+La tabla revela patrones interesantes de convergencia y divergencia entre las métricas:
+
+\begin{itemize}[leftmargin=1.5cm]
+  \item \textbf{Convergencia total:} El nodo 107 domina las tres métricas, confirmando su
+    rol como el nodo más importante de la red bajo cualquier criterio.
+  \item \textbf{Convergencia parcial (grado + intermediación):} Los nodos 1684, 3437, 1912
+    y 0 aparecen tanto en grado como en intermediación, lo que es esperado: nodos muy
+    conectados tienden a ser también puentes.
+  \item \textbf{Divergencia (cercanía vs. grado):} Los nodos 58 y 428 tienen alta cercanía
+    y moderada intermediación, pero \textit{no} son hubs de grado. Esto refleja posiciones
+    \textbf{geométricamente centrales} en la red, no necesariamente con muchas conexiones.
+  \item \textbf{Ausencias notables:} Los nodos 1912 y 3437, a pesar de ser el 3\textordmasculine\
+    y 4\textordmasculine\ en grado respectivamente, \textit{no aparecen} en el top 10 de cercanía.
+    Esto sugiere que están ubicados en la periferia estructural de la red,
+    posiblemente como centros de comunidades alejadas del núcleo.
+\end{itemize}
+
+
+%=============================================================
+%  CAPITULO 4: CONCLUSIONES
+%=============================================================
+\chapter{Conclusiones}
+
+%-------------------------------------------------------------
+\section{Patrones Observados}
+%-------------------------------------------------------------
+
+\begin{recomendacionbox}[Hallazgos principales del análisis]
+\begin{enumerate}[leftmargin=0.8cm]
+  \item \textbf{El nodo 107 domina las TRES métricas de centralidad}
+    $\rightarrow$ Es un \textit{super-hub} y \textit{super-puente} simultáneamente.
+    Con 1\,045 conexiones (25.9\% de la red), una intermediación de 0.48 y la mayor
+    cercanía (0.46), este nodo es el actor más influyente de toda la red bajo
+    cualquier criterio de centralidad analizado.
+  
+  \item \textbf{Alto grado $\neq$ alta cercanía siempre.}
+    El nodo 1912 tiene el tercer mayor grado (755 conexiones) pero no aparece en el
+    top 10 de cercanía. Esto demuestra que tener muchas conexiones no garantiza una
+    posición estructuralmente central en la red global.
+
+  \item \textbf{Nodos 58 y 428: grado moderado pero alta cercanía.}
+    Estos nodos no son hubs masivos, pero ocupan posiciones geométricamente centrales
+    en la topología de la red, permitiéndoles alcanzar eficientemente a todos los demás
+    nodos. Son candidatos ideales para la diseminación rápida de información.
+
+  \item \textbf{Distribución de grado tipo ley de potencias}
+    $\rightarrow$ Características de red \textit{scale-free}. La gran mayoría de nodos
+    tiene pocas conexiones, mientras que pocos hubs concentran una fracción
+    desproporcionada de las aristas. Esto es consistente con el modelo de
+    \textit{attachment preferencial} de Barabasi-Albert.
+
+  \item \textbf{Diametro peque\~no (8) con alta conectividad}
+    $\rightarrow$ Propiedades de \textit{small-world}. A pesar de tener mas de 4\,000
+    nodos, cualquier par de usuarios esta separado por un máximo de 8 saltos,
+    confirmando el fenomeno del ``mundo peque\~no'' en redes sociales.
+
+  \item \textbf{Una sola componente conexa}
+    $\rightarrow$ Red social completamente conectada. No existen usuarios aislados
+    o subgrupos desconectados del resto, lo que facilita el flujo global de información.
+\end{enumerate}
+\end{recomendacionbox}
+
+%-------------------------------------------------------------
+\section{Implicaciones}
+%-------------------------------------------------------------
+
+\begin{infobox}[Implicaciones para la difusión de información e influencia]
+Los resultados de este análisis tienen implicaciones directas para comprender la
+dinámica de la red social:
+
+\begin{itemize}[leftmargin=0.8cm]
+  \item \textbf{Difusión de información:} El nodo 107, al ser simultáneamente hub y
+    puente, tiene un rol desproporcionado en la propagación de información. Si este
+    nodo comparte contenido, puede alcanzar rápidamente a más del 25\% de la red
+    de forma directa y al resto a través de caminos muy cortos.
+
+  \item \textbf{Vulnerabilidad de la red:} La alta dependencia en pocos hubs (especialmente
+    el nodo 107) hace que la red sea vulnerable a \textit{ataques dirigidos}. La eliminación
+    del nodo 107 fragmentaría significativamente la estructura y aumentaría las distancias
+    promedio entre los nodos restantes.
+
+  \item \textbf{Detección de influencers:} Las tres métricas complementarias permiten
+    clasificar a los actores influyentes en diferentes categorias: conectores masivos
+    (grado), puentes entre comunidades (intermediación) y difusores eficientes (cercanía).
+
+  \item \textbf{Estrategias de campañas:} Para maximizar el alcance de una campaña de
+    información (o marketing viral), se deberían priorizar los nodos con alta cercanía
+    (58, 428, 107), ya que garantizan la difusión más rápida en toda la red.
+
+  \item \textbf{Estructura scale-free:} La distribución de ley de potencias implica que
+    la red es robusta ante fallos aleatorios (la eliminación de nodos al azar tiene
+    poco impacto), pero extremadamente frágil ante ataques dirigidos a los hubs.
+\end{itemize}
+\end{infobox}
+
+\end{document}
